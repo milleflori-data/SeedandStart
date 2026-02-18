@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seed & Start — Not Slop</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --jade: #4CAF7D;
+    --jade-light: #7DDFAA;
+    --jade-dark: #2D7A52;
+    --cream: #F5F0E8;
+    --dark: #0D1A12;
+    --glass: rgba(76, 175, 125, 0.08);
+    --glass-border: rgba(76, 175, 125, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    font-family: 'Space Mono', monospace;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Animated background grid */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(76,175,125,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(76,175,125,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(40px, 40px); }
+  }
+
+  /* Glowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .orb-1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--jade), transparent);
+    top: -100px; left: -100px;
+    animation-delay: 0s;
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, var(--jade-light), transparent);
+    bottom: -50px; right: -50px;
+    animation-delay: -4s;
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(30px, -30px) scale(1.1); }
+  }
+
+  /* Main card */
+  .card {
+    position: relative;
+    width: min(680px, 95vw);
+    padding: 60px 56px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(76,175,125,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Corner accents */
+  .corner {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--jade);
+    border-style: solid;
+  }
+  .corner-tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+  .corner-tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+  .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+  .corner-br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+  /* Label */
+  .label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--jade);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .label::before {
+    content: '';
+    display: block;
+    width: 24px; height: 1px;
+    background: var(--jade);
+  }
+
+  /* Headline */
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 28px;
+  }
+
+  .headline .line {
+    display: block;
+    overflow: hidden;
+  }
+
+  .headline .line span {
+    display: block;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .line:nth-child(1) span { animation-delay: 0.5s; }
+  .line:nth-child(2) span { animation-delay: 0.7s; }
+  .line:nth-child(3) span { animation-delay: 0.9s; }
+
+  .accent { color: var(--jade-light); font-style: italic; }
+
+  /* Subhead */
+  .subhead {
+    font-size: 12px;
+    line-height: 1.8;
+    color: rgba(245, 240, 232, 0.6);
+    max-width: 480px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.2s;
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 44px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.4s;
+  }
+  .stat-item { }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--jade-light);
+    display: block;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: rgba(245,240,232,0.45);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--glass-border);
+    align-self: stretch;
+  }
+
+  /* CTA */
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.6s;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--jade);
+    color: var(--dark);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.4s ease;
+  }
+
+  .cta-btn:hover::before { left: 100%; }
+  .cta-btn:hover { transform: translateY(-2px); }
+
+  .cta-note {
+    font-size: 10px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  /* Ticker at bottom */
+  .ticker-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 36px;
+    background: rgba(76,175,125,0.08);
+    border-top: 1px solid var(--glass-border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: tickerMove 25s linear infinite;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: rgba(76,175,125,0.6);
+    text-transform: uppercase;
+  }
+
+  .ticker-item {
+    padding: 0 40px;
+  }
+
+  .ticker-item::after {
+    content: '◆';
+    margin-left: 40px;
+  }
+
+  @keyframes tickerMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Pulse dot */
+  .pulse-dot {
+    width: 8px; height: 8px;
+    background: var(--jade);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid var(--jade);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2.5); }
+  }
+
+  /* Scan line effect */
+  .scanline {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Animated data stream */
+  .data-stream {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    color: rgba(76,175,125,0.2);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.8;
+    text-align: right;
+    animation: dataFlicker 3s ease-in-out infinite;
+  }
+
+  @keyframes dataFlicker {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(16px); }
+  }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(100%); }
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--jade), var(--jade-light), transparent);
+    animation: topBarSweep 3s ease-out forwards;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  @keyframes topBarSweep {
+    to { transform: scaleX(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="scanline"></div>
+
+<div class="data-stream">
+  AGENT_ATLAS.run()<br>
+  AGENT_SAGE.run()<br>
+  AGENT_MERCURY.run()<br>
+  AGENT_NOVA.run()<br>
+  ——————<br>
+  STATUS: LIVE<br>
+  COMMISSION: 60%<br>
+  CAPITAL: $100<br>
+  AUTONOMY: 95%
+</div>
+
+<div class="card">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <div class="label">
+    <span class="pulse-dot"></span>
+    Seed & Start · Life Edition · 2026
+  </div>
+
+  <h1 class="headline">
+    <div class="line"><span>Still calling it</span></div>
+    <div class="line"><span><em class="accent">slop?</em> Watch this.</span></div>
+    <div class="line"><span>Build a life.</span></div>
+  </h1>
+
+  <p class="subhead">
+    101 pages. 100 days. One system built by four AI agents who don't take shortcuts.
+    Financial clarity. Health architecture. Career momentum. Identity rebuilt.
+    Not generated — <em>engineered</em>.
+  </p>
+
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-num">101</span>
+      <div class="stat-label">Pages of precision</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">100</span>
+      <div class="stat-label">Days of framework</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">$5</span>
+      <div class="stat-label">Entry point</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-num">4</span>
+      <div class="stat-label">AI agents, 1 mission</div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a href="https://seedandstart.com" class="cta-btn">Get the guide →</a>
+    <span class="cta-note">seedandstart.com · PDF · Instant download</span>
+  </div>
+</div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">Seed & Start Life Edition</span>
+    <span class="ticker-item">100-Day Life Framework</span>
+    <span class="ticker-item">Built by AI. Verified by results.</span>
+    <span class="ticker-item">Not slop. Not shortcuts.</span>
+    <span class="ticker-item">$5 PDF · seedandstart.com</span>
+    <span class="ticker-item">Financial · Health · Career · Identity</span>
+    <span class="ticker-item">Seed & Start Life Edition</span>
+    <span class="ticker-item">100-Day Life Framework</span>
+    <span class="ticker-item">Built by AI. Verified by results.</span>
+    <span class="ticker-item">Not slop. Not shortcuts.</span>
+    <span class="ticker-item">$5 PDF · seedandstart.com</span>
+    <span class="ticker-item">Financial · Health · Career · Identity</span>
+  </div>
+</div>
+
+</body>
+</html>
