@@ -419,7 +419,10 @@
       </div>
       <div class="tracker-meta">
         <span id="tracker-raised">$0 raised</span>
-        <span class="tracker-pct" id="tracker-pct">0% to goal</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+          <span class="tracker-pct" id="tracker-pct">0% to goal</span>
+          <span id="tracker-updated" style="font-size:8px;color:rgba(245,240,232,0.2);letter-spacing:0.1em;"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -633,47 +636,69 @@
 
 <script>
   // ══════════════════════════════════════════════════════════
-  // REVENUE TRACKER
-  // TO UPDATE: Change CURRENT_REVENUE to your actual revenue.
-  // Example: when you make your first $5 sale, change it to 5.
-  // All displays on the page update automatically from this one number.
+  // DYNAMIC REVENUE TRACKER
+  // To update revenue: edit revenue.json in your GitHub repo.
+  // Change "current" to your new total. Push. Done.
+  // The site fetches fresh data on every page load.
+  // No HTML edits needed ever again.
   // ══════════════════════════════════════════════════════════
-  const CURRENT_REVENUE = 0;   // ← EDIT THIS NUMBER WHEN SALES COME IN
-  const GOAL = 100;
 
   function formatDollars(n) {
-    return '$' + n.toFixed(n % 1 === 0 ? 0 : 2);
+    return '$' + (Number.isInteger(n) ? n : n.toFixed(2));
   }
 
-  function initTracker() {
-    const pct = Math.min((CURRENT_REVENUE / GOAL) * 100, 100);
+  function renderTracker(current, goal, lastUpdated) {
+    const pct = Math.min((current / goal) * 100, 100);
 
     // Hero stat
-    document.getElementById('hero-revenue').textContent = formatDollars(CURRENT_REVENUE);
+    document.getElementById('hero-revenue').textContent = formatDollars(current);
 
-    // Tracker section
-    document.getElementById('tracker-amount').textContent = formatDollars(CURRENT_REVENUE);
-    document.getElementById('tracker-raised').textContent = formatDollars(CURRENT_REVENUE) + ' raised';
+    // Tracker card
+    document.getElementById('tracker-amount').textContent = formatDollars(current);
+    document.getElementById('tracker-raised').textContent = formatDollars(current) + ' raised';
     document.getElementById('tracker-pct').textContent = pct.toFixed(0) + '% to goal';
+    if (lastUpdated) {
+      const el = document.getElementById('tracker-updated');
+      if (el) el.textContent = 'Last updated ' + lastUpdated;
+    }
 
-    // Animate bar after a short delay (feels satisfying when it fills)
+    // Animate bar
     setTimeout(() => {
       document.getElementById('tracker-bar').style.width = pct + '%';
     }, 400);
 
     // Ticker
-    const tickerStr = 'Revenue: ' + formatDollars(CURRENT_REVENUE) + ' of ' + formatDollars(GOAL);
+    const tickerStr = 'Revenue: ' + formatDollars(current) + ' of ' + formatDollars(goal);
     document.getElementById('ticker-revenue').textContent = tickerStr;
     document.getElementById('ticker-revenue-2').textContent = tickerStr;
 
-    // Special state: if goal hit
-    if (CURRENT_REVENUE >= GOAL) {
+    // Milestone celebrations
+    if (current >= goal) {
       document.getElementById('tracker-amount').style.color = '#7DDFAA';
       document.querySelector('.tracker-label').textContent = '🎉 Goal Reached!';
+      document.getElementById('tracker-bar').style.background = 'linear-gradient(90deg,#2D7A52,#4CAF7D,#7DDFAA)';
+    } else if (current >= goal * 0.5) {
+      document.querySelector('.tracker-label').textContent = 'Live Revenue Tracker — Halfway There!';
+    } else if (current >= goal * 0.25) {
+      document.querySelector('.tracker-label').textContent = 'Live Revenue Tracker — Building Momentum';
     }
   }
 
-  initTracker();
+  async function loadRevenue() {
+    try {
+      // Cache-busted fetch so GitHub Pages doesn't serve stale data
+      const res = await fetch('./revenue.json?t=' + Date.now());
+      if (!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      renderTracker(data.current || 0, data.goal || 100, data.last_updated || null);
+    } catch (err) {
+      // Graceful fallback — show zeros, no broken UI
+      console.warn('Revenue data unavailable, showing defaults.', err);
+      renderTracker(0, 100, null);
+    }
+  }
+
+  loadRevenue();
 </script>
 
 </body>
