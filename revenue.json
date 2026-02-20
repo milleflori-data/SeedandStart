@@ -1,0 +1,7 @@
+{
+  "current": 0,
+  "goal": 100,
+  "currency": "USD",
+  "last_updated": "2026-02-20",
+  "note": "Update 'current' when sales come in. Push to GitHub. Site updates automatically."
+}
